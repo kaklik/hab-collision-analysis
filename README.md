@@ -38,7 +38,6 @@ Post-flight analysis by the detector team raised the hypothesis that the balloon
 | Impulse azimuth | **191° from north (~southward)** |
 | Momentum change \|Δp\| | **0.97 N·s** |
 | F-test p-value | **3.5 × 10⁻⁵** → H₀ rejected |
-| Direct method \|Δv\| | 2.48 m/s, az 206°, SNR 1.4 σ |
 
 The northward component is statistically significant (t-test p = 0.038); the hypothesis of natural burst is rejected at the 0.005% level. The magnitude and direction of the impulse are consistent with a collision with a horizontally flying object.
 
