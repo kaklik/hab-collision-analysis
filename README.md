@@ -16,7 +16,7 @@ Post-flight analysis by the detector team raised the hypothesis that the balloon
 
 | Parameter | Value |
 |-----------|-------|
-| Launch | 13:21 UTC, Prague (50.008°N, 14.447°E, 316 m AMSL) |
+| Launch | 29.4.2026 13:21 UTC, Prague (50.008°N, 14.447°E, 316 m AMSL) |
 | Burst | 14:09:28 UTC, 49.700°N, 14.594°E, 15 087 m |
 | Pressure altitude | FL495 (118.8 hPa) |
 | Gondola | Sphere, d = 160 mm, m = 300 g, Cd ≈ 0.31 |
@@ -27,7 +27,6 @@ Post-flight analysis by the detector team raised the hypothesis that the balloon
 2. **Wind profile** — Prague-Libuš radiosonde (IGRA2, 12 UTC) vs. in-situ wind derived from the ascent trajectory; sounding was 10.4 m/s off at burst altitude → ascent profile used as reference
 3. **Kinematic burst reconstruction** — ascent polynomial fit (degree 2, last 30 packets) intersected with kinematic free-fall model (first 25 descent packets) to locate the exact separation point in time and space
 4. **Horizontal F-test** — H₀ (natural burst, wind drift only) vs. H₁ (horizontal impulse Δv fitted with `least_squares`); F-test over 5 post-burst packets
-5. **Direct GPS method** — model-free velocity difference across burst as cross-validation
 
 ## Key results
 
