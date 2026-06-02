@@ -4,11 +4,11 @@ Jupyter notebook that analyses GPS telemetry from the **Dotknisevesmiru stratosp
 
 ## Background
 
-The balloon flight was a student balloon flight carried out by Gymnázium Matyáše Lercha Brno as part of the [Dotkni se vesmíru](https://dotknisevesmiru.cz/) project. The gondola was a polystyrene sphere with a student-built payload consisting of a Raspberry Pi, camera, UV and temperature sensors, and a borrowed [AIRDOS03](https://docs.dos.ust.cz/airdos/AIRDOS03) particle detector. AIRDOS03 is an engineering prototype that serves as the basis for SPACEDOS04, a detector planned for flight to the ISS with Czech astronaut Aleš Svoboda.
+The balloon flight was a student balloon flight carried out by Gymnázium Matyáše Lercha Brno as part of the [Dotkni se vesmíru](https://dotknisevesmiru.cz/) project. The gondola was a polystyrene sphere with a student-built payload consisting of a Raspberry Pi, camera, UV and temperature sensors, and a borrowed [AIRDOS03](https://docs.dos.ust.cz/airdos/AIRDOS03) particle detector. AIRDOS03 is an engineering prototype that serves as the basis for SPACEDOS04, a detector planned for flight to the ISS with [Czech astronaut Aleš Svoboda](https://en.wikipedia.org/wiki/Ale%C5%A1_Svoboda_(astronaut)).
 
 ### Separation anomaly
 
-At ~15 km altitude the rope connecting the gondola to the balloon snapped. The gondola fell without a parachute and without any balloon remnants. The payload was recovered after roughly two hours of searching. Due to a power-supply fault the AIRDOS03 stopped recording data shortly after launch; the GPS telemetry remained intact throughout the flight.
+At ~15 km altitude, the rope connecting the gondola to the balloon snapped. The gondola fell without a parachute and without any balloon remnants. The payload was recovered after roughly two hours of searching. Due to a power-supply fault, the AIRDOS03 stopped recording data shortly after launch; the GPS telemetry remained intact throughout the flight.
 
 Post-flight analysis by the detector team raised the hypothesis that the balloon had been struck by an aircraft at burst altitude. This notebook is the quantitative investigation of that hypothesis.
 
