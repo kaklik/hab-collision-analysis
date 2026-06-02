@@ -4,7 +4,7 @@ Jupyter notebook that analyses GPS telemetry from the **Dotknisevesmiru stratosp
 
 ## Background
 
-The balloon flight was a student balloon flight carried out by Gymnázium Matyáše Lercha Brno as part of the [Dotkni se vesmíru](https://dotknisevesmiru.cz/) project. The gondola was a polystyrene sphere with a student-built payload consisting of a Raspberry Pi, camera, UV and temperature sensors, and a borrowed [AIRDOS03](https://docs.dos.ust.cz/airdos/AIRDOS03) particle detector. AIRDOS03 is an engineering prototype that serves as the basis for SPACEDOS04, a detector planned for flight to the ISS with [Czech astronaut Aleš Svoboda](https://en.wikipedia.org/wiki/Ale%C5%A1_Svoboda_(astronaut)).
+The balloon flight was a student balloon flight carried out by [Gymnázium Matyáše Lercha Brno](https://www.gml.cz/) as part of the [Dotkni se vesmíru](https://dotknisevesmiru.cz/) project. The gondola was a polystyrene sphere with a student-built payload consisting of a Raspberry Pi, camera, UV and temperature sensors, and a borrowed [AIRDOS03](https://docs.dos.ust.cz/airdos/AIRDOS03) particle detector. AIRDOS03 is an engineering prototype that serves as the basis for SPACEDOS04, a detector planned for flight to the ISS with [Czech astronaut Aleš Svoboda](https://en.wikipedia.org/wiki/Ale%C5%A1_Svoboda_(astronaut)).
 
 ### Separation anomaly
 
@@ -49,7 +49,7 @@ The northward component is statistically significant (t-test p = 0.038); the hyp
 | | |
 |---|---|
 | ![Gondola after impact](doc/img/20260429_180036.jpg) | ![Electronics laid out](doc/img/20260430_144646.jpg) |
-| Gondola recovered in grass after uncontrolled free-fall (29 Apr, evening). The polystyrene sphere is cracked open. | Internal electronics laid out after opening the sphere (30 Apr). Both halves of the sphere visible; payload destroyed on impact. |
+| Gondola recovered in grass after uncontrolled free-fall (29 Apr, evening). The polystyrene sphere is cracked open. | Internal electronics laid out after opening the sphere (30 Apr). Both halves of the sphere were visible; the payload was destroyed on impact. |
 
 ![Snapped suspension cord and flight board](doc/img/20260430_144659.jpg)
 
