@@ -53,11 +53,11 @@ The headline result above rests on rejecting H₀ with a small, model-based impu
 
 **No.** The per-axis GPS scatter is ~5 m and similar in both axes (left). If the gondola had kept a constant velocity through burst, its departure from the pre-burst straight line would stay inside that ±5 m band; instead the path bends sharply at burst and leaves the band within a single 4 s packet, diverging at 3.0 m/s (right). The step is real and ~10× the measurement noise. **→ H1 excluded.**
 
-### H2 — Can wind drag turn the gondola by 3 m/s?
+### H2 — Can a wind gust turn the gondola by 3 m/s?
 
 ![H2 wind drag](TTS9_H2_wind_drag.png)
 
-**No — the timescales don't match.** At burst altitude (15 km) the thin air makes the 160 mm sphere's drag response very slow: a realistic 5 m/s relative wind would need ~160 s to build 3 m/s, and even an unphysical 10 m/s wind needs ~23 s — versus the ~4 s in which the step appears (left). The drag relaxation time is ~100 s at burst and only drops below ~20 s near the ground (right), so drag is negligible at separation and the post-burst flight is essentially ballistic. Wind only re-couples the gondola low down, which is what produces the drift seen late in the fall. **→ H2 excluded.**
+**No — the timescales don't match.** At burst altitude (15 km), the thin air makes the 160 mm sphere's drag response very slow: a realistic 5 m/s relative wind change would need ~160 s to build 3 m/s, and even an unphysical 10 m/s wind needs ~23 s — versus the ~4 s in which the step appears (left). The drag relaxation time is ~100 s at burst and only drops below ~20 s near the ground (right), so drag is negligible at separation and the post-burst flight is essentially ballistic. Wind only re-couples the gondola low down, which is what produces the drift seen late in the fall. **→ H2 excluded.**
 
 ### H3 — Can the spin (Magnus effect) produce the side-step?
 
