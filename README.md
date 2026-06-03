@@ -43,7 +43,21 @@ The northward component is statistically significant (t-test p = 0.038); the hyp
 
 ![Summary figure](TTS9_final_analysis.png)
 
-## Advanced diagnostics — stress-testing the collision hypothesis
+## Methods
+
+### Burst location reconstruction
+
+The vertical position of the gondola is described by a 2nd-degree polynomial fit over the last 30 ascent packets and a kinematic free-fall model for the first 25 descent packets. The separation time `t_sep` that minimises the altitude RMS of the descent fit is found by a 1-D sweep, then refined with `scipy.optimize.least_squares`. The fitted drag coefficient Cd ≈ 0.305 is consistent with Stokes–Oseen theory for a sphere at Re ≈ 130 000.
+
+### Horizontal hypothesis test
+
+After burst the gondola drifts horizontally at the local wind speed while aerodynamic drag equalises its velocity with the surrounding air. Under H₁, an additional impulse (Δv_N, Δv_E) is added at `t_sep`. Both hypotheses are propagated numerically and compared against the first 5 GPS descent packets. The improvement in χ² is evaluated with an F-test (2 extra parameters, N = 10 observations).
+
+### Wind reference
+
+The radiosonde sounding from 12 UTC differed from the in-situ balloon-derived wind by 10.4 m/s at burst altitude. The in-situ wind profile (sliding-window linear regression over the ascent GPS positions) is used as the reference in the trajectory simulation.
+
+## Stress-testing of the collision hypothesis
 
 The headline result above rests on rejecting H₀ with a small, model-based impulse fit. Because the consequences of claiming a mid-air collision are significant, the impulse was put through an independent, sceptical re-analysis (`advanced_telemetry_analysis.py`). The question is reframed model-free: **there is a ~3.0 m/s discontinuity in the gondola's horizontal velocity at burst — what can actually cause it?** Each candidate explanation gets one figure that shows how well the telemetry can confirm or exclude it.
 
@@ -75,7 +89,7 @@ The headline result above rests on rejecting H₀ with a small, model-based impu
 
 ![H5 pendulum](TTS9_H5_pendulum.png)
 
-**Not visibly.** If the gondola swung as a pendulum carrying the 3 m/s step, that swing would imprint a periodic horizontal motion on the ascent GPS — but its visibility depends on the suspension-line length, because the position amplitude of a 3 m/s swing is *A = v·√(L/g)*. For a long line (L > ~16 m) the swing is slow (period > 8 s, resolvable) and wide (4–7 m, above noise) and would show as a clean periodogram peak; none is seen — the only horizontal power is a slow ~50 s wind meander (left and middle). For a short line (a few m) the same 3 m/s swing is spatially tiny (~1 m) and faster than the 8 s GPS Nyquist, hence invisible — but it would require a violent 40–55° amplitude (right). **→ long-line pendulum excluded; a short-line swing is unsupported and physically implausible.**
+**Not visibly.** If the gondola swung as a pendulum carrying the 3 m/s step, that swing would imprint a periodic horizontal motion on the ascent GPS — but its visibility depends on the suspension-line length, because the position amplitude of a 3 m/s swing is *A = v·√(L/g)*. For a long line (L > ~16 m), the swing is slow (period > 8 s, resolvable) and wide (4–7 m, above noise) and would show as a clean periodogram peak; none is seen — the only horizontal power is a slow ~50 s wind meander (left and middle). For a short line (a few m), the same 3 m/s swing is spatially tiny (~1 m) and faster than the 8 s GPS Nyquist, hence invisible — but it would require a violent 40–55° amplitude (right). **→ long-line pendulum excluded; a short-line swing is unsupported and physically implausible.**
 
 ### Conclusion of the advanced analysis
 
@@ -90,7 +104,7 @@ The headline result above rests on rejecting H₀ with a small, model-based impu
 
 The horizontal velocity step at burst is **real and ballistic** — drag, GPS error, Magnus and a visible pendulum are all ruled out, so it is a genuine ~3 m/s (~0.9 N·s) change of motion. But its **origin cannot be decided from GPS alone**: an external impulse (collision) and an internal cause (a swing or separation kick frozen at release) produce an identical ballistic step, and there is no IMU and no sub-8 s sampling to tell them apart. The notebook's confident "H₀ rejected → collision" overstates the case on two counts — the p-value is inflated by treating correlated residuals as independent, and the step is not diagnostic of an *external* cause.
 
-**Bottom line: the telemetry is consistent with a mid-air collision, but does not prove one.** Resolving it would need data this flight did not record — an onboard IMU (an impact would show an acceleration spike) or faster GPS (to resolve the pre-burst swing and check whether its direction matches the step).
+**Bottom line: the telemetry is consistent with a mid-air collision, but does not prove one.** Resolving it would need data; this flight did not record — an onboard IMU (an impact would show an acceleration spike) or faster GPS (to resolve the pre-burst swing and check whether its direction matches the step).
 
 ## Recovery photographs
 
@@ -149,17 +163,3 @@ jupyter nbconvert --to notebook --execute --inplace \
 ```
 
 Or open in JupyterLab / VS Code and run all cells.
-
-## Methods
-
-### Burst location reconstruction
-
-The vertical position of the gondola is described by a 2nd-degree polynomial fit over the last 30 ascent packets and a kinematic free-fall model for the first 25 descent packets. The separation time `t_sep` that minimises the altitude RMS of the descent fit is found by a 1-D sweep, then refined with `scipy.optimize.least_squares`. The fitted drag coefficient Cd ≈ 0.305 is consistent with Stokes–Oseen theory for a sphere at Re ≈ 130 000.
-
-### Horizontal hypothesis test
-
-After burst the gondola drifts horizontally at the local wind speed while aerodynamic drag equalises its velocity with the surrounding air. Under H₁, an additional impulse (Δv_N, Δv_E) is added at `t_sep`. Both hypotheses are propagated numerically and compared against the first 5 GPS descent packets. The improvement in χ² is evaluated with an F-test (2 extra parameters, N = 10 observations).
-
-### Wind reference
-
-The radiosonde sounding from 12 UTC differed from the in-situ balloon-derived wind by 10.4 m/s at burst altitude. The in-situ wind profile (sliding-window linear regression over the ascent GPS positions) is used as the reference in the trajectory simulation.
