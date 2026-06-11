@@ -399,13 +399,20 @@ def make_wind_interpolators(h_asc_wind, u_asc_wind, v_asc_wind, SND, H_SEP):
 # 5  HORIZONTAL HYPOTHESIS TEST
 # ═══════════════════════════════════════════════════════════════════════════
 
-def simulate_horiz(dv_N, dv_E, burst, wind_fns, dt=0.02):
+def simulate_horiz(dv_N, dv_E, burst, wind_fns, dt=0.02, k_horiz=None):
+    """Simulate horizontal trajectory after burst.
+
+    k_horiz: horizontal drag coefficient [m²/kg].  Defaults to burst['K_VERT']
+             (vertical value) when None.  Pass a calibrated value to decouple
+             horizontal drag from the vertical fit.
+    """
     H_SEP    = burst['H_SEP']
     LAT_SEP  = burst['LAT_SEP']
     LON_SEP  = burst['LON_SEP']
     VH0_SEP  = burst['VH0_SEP']
     TS_OPT   = burst['TS_OPT']
     K_VERT   = burst['K_VERT']
+    K_H      = k_horiz if k_horiz is not None else K_VERT   # horizontal drag coeff
     U_SEP, V_SEP = wind_fns['U_SEP'], wind_fns['V_SEP']
     u_f, v_f     = wind_fns['u_asc_f'], wind_fns['v_asc_f']
 
@@ -423,12 +430,7 @@ def simulate_horiz(dv_N, dv_E, burst, wind_fns, dt=0.02):
         dur = u_g - uw; dvr = v_g - vw
         vrh = np.sqrt(dur ** 2 + dvr ** 2)
         if vrh > 0.001:
-            # Use the same fitted drag parameter for horizontal as for vertical.
-            # K_VERT encodes the full system (gondola + parachute if present), and
-            # a parachute canopy presents a similar cross-section horizontally.
-            # For a bare gondola K_VERT ≈ 0.5·Cd_sphere·A_sphere/M, so this is
-            # backward-compatible with the no-parachute case.
-            ad = K_VERT * rho * vrh ** 2
+            ad = K_H * rho * vrh ** 2
             u_g -= ad * (dur / vrh) * dt
             v_g -= ad * (dvr / vrh) * dt
         lat += v_g * dt / M_PER_DEG_LAT
@@ -615,6 +617,88 @@ def hypothesis_test(DESC, burst, wind_fns, T0, wind_shear_1km=0.0):
         gps_vs_wind.append((h_mid, u_gps, v_gps, u_asc, v_asc, delta))
         h_gps_w.append(h_mid); u_gps_w.append(u_gps); v_gps_w.append(v_gps)
 
+    # ── Horizontal K_VERT calibration from post-burst velocity relaxation ───────
+    # After burst the gondola retains its burst-point horizontal velocity and
+    # decelerates toward the local wind with time constant
+    #   τ_h = M / (K_VERT_horiz · ρ · v_ref)
+    # The vertical K_VERT (from the descent-rate fit) may differ from the
+    # horizontal K_VERT (parachute geometry is anisotropic).
+    #
+    # Method: compute |v_GPS(t) − v_wind(h(t))| for the first N_VCAL GPS
+    # intervals after burst (observed = descent GPS; reference = ascent wind
+    # profile at the same altitude).  Fit an exponential decay to obtain
+    # τ_h_horiz, then derive K_VERT_horiz.
+    #
+    # Quality gate: accept the calibrated value only when the fit residuals
+    # are dominated by the velocity signal (not wind-model drift), i.e. when
+    # the fitted v0 exceeds 2×σ_v (the velocity noise floor).
+    from scipy.optimize import curve_fit as _curve_fit
+
+    N_VCAL = 12   # velocity intervals to use for calibration
+    _t_v, _d_v, _s_v = [], [], []
+    for _ki in range(1, min(N_VCAL + 1, len(desc_post_all))):
+        _dt_k = float(desc_post_all['t_sec'].values[_ki]
+                      - desc_post_all['t_sec'].values[_ki - 1])
+        if _dt_k <= 0:
+            continue
+        _t_mid = (float(desc_post_all['t_sec'].values[_ki])
+                  + float(desc_post_all['t_sec'].values[_ki - 1])) / 2.0 \
+                 - T0 - float(burst['TS_OPT'])
+        if _t_mid <= 0:
+            continue
+        _h_m = float((desc_post_all['alt[m]'].values[_ki]
+                      + desc_post_all['alt[m]'].values[_ki - 1]) / 2)
+        _ug  = float((desc_post_all['lon[deg]'].values[_ki]
+                      - desc_post_all['lon[deg]'].values[_ki - 1])
+                     / _dt_k * M_PER_DEG_LON)
+        _vg  = float((desc_post_all['lat[deg]'].values[_ki]
+                      - desc_post_all['lat[deg]'].values[_ki - 1])
+                     / _dt_k * M_PER_DEG_LAT)
+        _uw  = float(u_f_asc(max(_h_m, 500)))
+        _vw  = float(v_f_asc(max(_h_m, 500)))
+        _d   = float(np.hypot(_ug - _uw, _vg - _vw))
+        # Velocity uncertainty: GPS position noise translated to velocity
+        # plus linear wind-model drift at this time.
+        _sv  = float(np.hypot(sigma_gps / _dt_k, shear_vel * max(_t_mid, 1.0)))
+        _t_v.append(_t_mid); _d_v.append(_d); _s_v.append(_sv)
+
+    K_VERT_horiz = burst['K_VERT']   # default: same as vertical
+    tau_h_horiz  = tau_h              # default: formula value
+    _vcal_note   = 'default (no calibration)'
+
+    if len(_t_v) >= 4:
+        try:
+            def _exp_v(t, v0, tau):
+                return v0 * np.exp(-t / tau)
+            _popt, _pcov = _curve_fit(
+                _exp_v, _t_v, _d_v,
+                p0=[float(np.max(_d_v)), tau_h],
+                sigma=_s_v, absolute_sigma=True,
+                bounds=([0.0, 2.0], [50.0, 600.0]),
+                maxfev=3000)
+            _v0_fit, _tau_fit = float(_popt[0]), float(_popt[1])
+            _tau_err = float(np.sqrt(max(_pcov[1, 1], 0.0)))
+            _v0_noise = float(np.median(_s_v))  # typical velocity noise floor
+            # Accept when: signal visible (v0 > 2×noise) AND τ well-constrained (<60% error)
+            if _v0_fit > 2.0 * _v0_noise and _tau_err / max(_tau_fit, 1) < 0.6:
+                tau_h_horiz  = _tau_fit
+                K_VERT_horiz = M_GON / max(tau_h_horiz * rho_sep * v_ref, 1e-9)
+                _vcal_note   = (f'CALIBRATED  τ_h_horiz={tau_h_horiz:.0f}s'
+                                f'  ±{_tau_err:.0f}s  v0={_v0_fit:.2f}m/s'
+                                f'  K_horiz={K_VERT_horiz:.5f}m²/kg')
+            else:
+                _vcal_note = (f'rejected  v0={_v0_fit:.2f}m/s (noise~{_v0_noise:.2f}m/s),'
+                              f' τ={_tau_fit:.0f}±{_tau_err:.0f}s — keeping formula')
+        except Exception as _exc:
+            _vcal_note = f'fit failed ({_exc}) — keeping formula'
+    else:
+        _vcal_note = 'too few velocity samples — keeping formula'
+
+    print(f"  Horiz K calibration (descent GPS vs ascent wind profile): {_vcal_note}")
+    if tau_h_horiz != tau_h:
+        print(f"    τ_h formula={tau_h:.0f}s → τ_h_horiz={tau_h_horiz:.0f}s"
+              f"  K_vert={burst['K_VERT']:.5f} → K_horiz={K_VERT_horiz:.5f} m²/kg")
+
     # Use ascent profile for the simulation (GPS velocity ≠ actual wind at
     # stratospheric altitudes — at 32 km the parachute equilibration time is
     # τ = M/(K_VERT·ρ·v_rel) ≈ 15–50 s, so GPS velocity is a time-lagged
@@ -624,7 +708,7 @@ def hypothesis_test(DESC, burst, wind_fns, T0, wind_shear_1km=0.0):
 
     def _run_h0h1(wf):
         """Run H0 and H1 with heteroscedastic per-point uncertainty sigma_eff."""
-        ts0_, la0_, lo0_, _ = simulate_horiz(0., 0., burst, wf)
+        ts0_, la0_, lo0_, _ = simulate_horiz(0., 0., burst, wf, k_horiz=K_VERT_horiz)
         la0e = np.interp(td_h, ts0_, la0_)
         lo0e = np.interp(td_h, ts0_, lo0_)
         rl0  = (lm_h - la0e) * M_PER_DEG_LAT / sigma_eff
@@ -633,7 +717,8 @@ def hypothesis_test(DESC, burst, wind_fns, T0, wind_shear_1km=0.0):
 
         def _res1(params):
             dv_n, dv_e = params
-            ts_, la_, lo_, _ = simulate_horiz(dv_n, dv_e, burst, wf)
+            ts_, la_, lo_, _ = simulate_horiz(dv_n, dv_e, burst, wf,
+                                              k_horiz=K_VERT_horiz)
             lp = np.interp(td_h, ts_, la_); op = np.interp(td_h, ts_, lo_)
             return np.concatenate([(lm_h - lp) * M_PER_DEG_LAT / sigma_eff,
                                    (om_h - op) * M_PER_DEG_LON / sigma_eff])
@@ -643,7 +728,8 @@ def hypothesis_test(DESC, burst, wind_fns, T0, wind_shear_1km=0.0):
         dv_n, dv_e = r1.x
         c1 = np.sum(r1.fun ** 2)
 
-        ts1_, la1_, lo1_, _ = simulate_horiz(dv_n, dv_e, burst, wf)
+        ts1_, la1_, lo1_, _ = simulate_horiz(dv_n, dv_e, burst, wf,
+                                             k_horiz=K_VERT_horiz)
         la1e = np.interp(td_h, ts1_, la1_)
         lo1e = np.interp(td_h, ts1_, lo1_)
         rl1_s = (lm_h - la1e) * M_PER_DEG_LAT / sigma_eff
