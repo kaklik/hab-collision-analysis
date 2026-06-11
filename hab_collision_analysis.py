@@ -27,9 +27,12 @@ SOUNDING_ZIP  = 'EZM00011520-data-beg2025.txt.zip'
 SOUNDING_DATE = '2026 04 29'   # YYYY MM DD
 SOUNDING_HOUR = 12             # UTC
 
-# Gondola parameters
-M_GON = 0.300          # kg
-D_SPH = 0.160          # m
+# Gondola / balloon system parameters (verified with ČHMU, 2026-06-11)
+M_GON  = 0.410         # kg  — total payload + sphere (Kaymont calculator: 410 g)
+D_SPH  = 0.160         # m   — polystyrene sphere diameter
+M_BAL  = 0.800         # kg  — balloon latex (Kaymont-800)
+V_GAS  = 1.85          # m³  — hydrogen fill at launch
+L_ROPE = 6.0           # m   — suspension rope length
 
 # Fit parameters
 N_ASC_FIT  = 30        # last N ascent packets used for polynomial fit

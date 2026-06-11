@@ -19,7 +19,9 @@ Post-flight analysis by the detector team raised the hypothesis that the balloon
 | Launch | 29.4.2026 13:21 UTC, Prague (50.008°N, 14.447°E, 316 m AMSL) |
 | Burst | 14:09:28 UTC, 49.700°N, 14.594°E, 15 087 m |
 | Pressure altitude | FL495 (118.8 hPa) |
-| Gondola | Sphere, d = 160 mm, m = 300 g, Cd ≈ 0.31 |
+| Gondola | Sphere, d = 160 mm, m = 410 g, Cd ≈ 0.42 |
+| Balloon | Kaymont-800 (latex 800 g), H₂ fill 1.85 m³ |
+| Suspension rope | 6 m |
 
 ## Analysis structure
 
@@ -34,12 +36,12 @@ Post-flight analysis by the detector team raised the hypothesis that the balloon
 |----------|-------|
 | Burst time | 14:09:28 UTC |
 | Burst altitude | 15 087 m (FL495) |
-| Horizontal impulse \|Δv\| | **3.24 m/s** (trajectory fit) |
-| Impulse azimuth | **191° from north (~southward)** |
-| Momentum change \|Δp\| | **0.97 N·s** |
-| F-test p-value | **3.5 × 10⁻⁵** → H₀ rejected |
+| Horizontal impulse \|Δv\| | **3.34 m/s** (trajectory fit, N=5 points) |
+| Impulse azimuth | **190° from north (~southward)** |
+| Momentum change \|Δp\| | **1.37 N·s** (m = 410 g) |
+| F-test p-value | **3.2 × 10⁻²** → H₀ rejected (autocorrelation-corrected dof) |
 
-The northward component is statistically significant (t-test p = 0.038); the hypothesis of natural burst is rejected at the 0.005% level. The magnitude and direction of the impulse are consistent with a collision with a horizontally flying object.
+The hypothesis of natural burst is rejected at the 3.2% level. The effective degrees of freedom are corrected for residual autocorrelation (N_eff ≈ 2.7 independent observations). The magnitude and direction of the impulse are consistent with a collision with a horizontally flying object.
 
 ![Summary figure](TTS9_final_analysis.png)
 
@@ -47,7 +49,7 @@ The northward component is statistically significant (t-test p = 0.038); the hyp
 
 ### Burst location reconstruction
 
-The vertical position of the gondola is described by a 2nd-degree polynomial fit over the last 30 ascent packets and a kinematic free-fall model for the first 25 descent packets. The separation time `t_sep` that minimises the altitude RMS of the descent fit is found by a 1-D sweep, then refined with `scipy.optimize.least_squares`. The fitted drag coefficient Cd ≈ 0.305 is consistent with Stokes–Oseen theory for a sphere at Re ≈ 130 000.
+The vertical position of the gondola is described by a 2nd-degree polynomial fit over the last 30 ascent packets and a kinematic free-fall model for the first 25 descent packets. The separation time `t_sep` that minimises the altitude RMS of the descent fit is found by a 1-D sweep, then refined with `scipy.optimize.least_squares`. The fitted drag coefficient Cd ≈ 0.42 (m = 410 g, d = 160 mm sphere) is consistent with Stokes–Oseen theory for a sphere with protrusions at Re ≈ 130 000.
 
 ### Horizontal hypothesis test
 
@@ -89,7 +91,7 @@ The headline result above rests on rejecting H₀ with a small, model-based impu
 
 ![H5 pendulum](TTS9_H5_pendulum.png)
 
-**Not visibly.** If the gondola swung as a pendulum carrying the 3 m/s step, that swing would imprint a periodic horizontal motion on the ascent GPS — but its visibility depends on the suspension-line length, because the position amplitude of a 3 m/s swing is *A = v·√(L/g)*. For a long line (L > ~16 m), the swing is slow (period > 8 s, resolvable) and wide (4–7 m, above noise) and would show as a clean periodogram peak; none is seen — the only horizontal power is a slow ~50 s wind meander (left and middle). For a short line (a few m), the same 3 m/s swing is spatially tiny (~1 m) and faster than the 8 s GPS Nyquist, hence invisible — but it would require a violent 40–55° amplitude (right). **→ long-line pendulum excluded; a short-line swing is unsupported and physically implausible.**
+**Not visibly — and the confirmed rope length makes it undetectable.** The suspension rope was confirmed as 6 m. If the gondola swung as a pendulum carrying the 3 m/s step, that swing would imprint a periodic horizontal motion on the ascent GPS — but its visibility depends on the suspension-line length, because the position amplitude of a 3 m/s swing is *A = v·√(L/g)*. For a long line (L > ~16 m), the swing is slow (period > 8 s, resolvable) and wide (4–7 m, above noise) and would show as a clean periodogram peak; none is seen — the only horizontal power is a slow ~50 s wind meander (left and middle). For the confirmed **L = 6 m** rope, the pendulum period is 4.9 s (below the 8 s GPS Nyquist, aliased) and the position amplitude is 2.4 m (below the ~5 m GPS noise) — both completely undetectable. The required swing angle is **~22°**, which is physically plausible. **→ long-line pendulum excluded; the confirmed 6 m rope makes any swing invisible in the GPS data, and a 22° swing is not implausible — pendulum hypothesis cannot be excluded.**
 
 ### Conclusion of the advanced analysis
 
@@ -99,12 +101,12 @@ The headline result above rests on rejecting H₀ with a small, model-based impu
 | H2 Wind drag on the fall | **excluded** | drag needs ~160 s at realistic wind; the step took ~4 s |
 | H3 Rotation + Magnus | **excluded** | force too small; tumbling averages its direction to zero |
 | H4 Reconstruction artefact | **partial** | step robust to the wind guess, but p = 3.5×10⁻⁵ is overstated (correlated residuals) |
-| H5 Pendulum | **excluded\*** | no visible swing for any long line; short-line swing implausible |
+| H5 Pendulum | **not detectable** | confirmed 6 m rope: swing invisible (T=4.9s aliased, A=2.4m below noise), 22° angle plausible |
 | H6 External collision | **survives** | not independently testable from this telemetry |
 
-The horizontal velocity step at burst is **real and ballistic** — drag, GPS error, Magnus and a visible pendulum are all ruled out, so it is a genuine ~3 m/s (~0.9 N·s) change of motion. But its **origin cannot be decided from GPS alone**: an external impulse (collision) and an internal cause (a swing or separation kick frozen at release) produce an identical ballistic step, and there is no IMU and no sub-8 s sampling to tell them apart. The notebook's confident "H₀ rejected → collision" overstates the case on two counts — the p-value is inflated by treating correlated residuals as independent, and the step is not diagnostic of an *external* cause.
+The horizontal velocity step at burst is **real and ballistic** — drag, GPS error, and Magnus force are all ruled out. But its **origin cannot be decided from GPS alone**: an external impulse (collision) and an internal cause (a pendulum swing frozen at release) produce an identical ballistic step. The confirmed 6 m rope length is critical: a 22° swing at burst would be completely invisible in GPS data (period 4.9 s below Nyquist, amplitude 2.4 m below noise), so the pendulum hypothesis cannot be dismissed. The corrected p-value (3.2 × 10⁻², autocorrelation-adjusted) is weaker than the notebook's 3.5 × 10⁻⁵ but still rejects H₀.
 
-**Bottom line: the telemetry is consistent with a mid-air collision, but does not prove one.** Resolving it would need data; this flight did not record — an onboard IMU (an impact would show an acceleration spike) or faster GPS (to resolve the pre-burst swing and check whether its direction matches the step).
+**Bottom line: the telemetry is consistent with a mid-air collision, but does not prove one.** The ~3.3 m/s (~1.4 N·s) velocity step is real and cannot be explained by atmospheric effects alone. However, the same step could result from a pendulum swing frozen at rope separation — and with the confirmed 6 m rope, that scenario is both invisible to GPS and physically plausible (22° swing). Distinguishing the two causes would require an onboard IMU (collision would show an impulsive acceleration spike) or faster-than-4 s GPS sampling.
 
 ## Recovery photographs
 

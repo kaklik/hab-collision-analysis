@@ -709,13 +709,12 @@ def fig_h4_reconstruction(df, st, out='TTS9_H4_reconstruction.png'):
 #  that, frozen at line release, it carries the 3 m/s step, that swing must
 #  already show up as a periodic horizontal motion in the ascent GPS.  Key
 #  geometry: position amplitude A_x = v_max/omega, omega = sqrt(g/L).  A SHORT
-#  line (high omega) makes a 3 m/s swing travel only ~1 m and reverse every
-#  ~2 s -> below the 5 m noise AND faster than the 8 s GPS Nyquist (aliased)
-#  -> invisible, yet it needs a violent 40-55 deg swing.  A LONG line (L>~16 m)
-#  makes the same swing slow (period > 8 s) and wide (A_x = 4-7 m) -> it WOULD
-#  appear as a clean periodogram peak.  None is seen — the only horizontal
-#  power is a slow ~50 s wind meander.  VERDICT: long-line pendulum EXCLUDED;
-#  short-line merely invisible (not supported).
+#  Confirmed rope length: 6 m (ČHMU consultation, 2026-06-11).
+#  For L=6 m: T=4.9 s (below 8 s GPS Nyquist, aliased), A_x=2.4 m (below 5 m
+#  GPS noise) -> completely invisible in GPS.  Required swing angle: ~22°
+#  (physically plausible, not violent).  VERDICT: long-line (L>16 m) pendulum
+#  EXCLUDED; confirmed L=6 m swing is invisible AND plausible — CANNOT BE
+#  EXCLUDED from GPS data alone.
 # =====================================================================
 def h5_report(df, st):
     r = ascent_resid(df, st)
@@ -725,16 +724,22 @@ def h5_report(df, st):
     print("\n" + "=" * 70)
     print(" H5 — Pendulum swing frozen at release?")
     print("=" * 70)
+    L_ROPE_CONFIRMED = 6.0   # m — confirmed from ČHMU consultation
     print(f"    GPS cadence {r['cad']:.1f} s -> only pendulums with line L > {L_res:.0f} m are resolvable.")
+    print(f"    Confirmed suspension rope: {L_ROPE_CONFIRMED:.0f} m")
     print("    A 3 m/s swing: position amplitude A_x = 3*sqrt(L/g):")
-    for L in (2, 5, 10, 16, 25):
+    for L in (2, L_ROPE_CONFIRMED, 10, 16, 25):
         Tp, Ax, th = pendulum_disp(3.0, L)
         tag = "resolvable" if Tp > P_nyq else "ALIASED (invisible)"
-        print(f"      L={L:2d} m: T={Tp:5.1f}s  A_x={Ax:4.1f}m  swing={th:4.1f}deg   [{tag}]")
+        confirmed = " <-- CONFIRMED ROPE LENGTH" if L == L_ROPE_CONFIRMED else ""
+        print(f"      L={L:4.1f} m: T={Tp:5.1f}s  A_x={Ax:4.1f}m  swing={th:4.1f}deg   [{tag}]{confirmed}")
     print(f"    3-sigma detectable amplitude over {r['N']} packets ~ {floor3:.1f} m.")
     print(f"    Ascent residuals: North RMS {r['rmsN']:.1f} m (~noise), East RMS {r['rmsE']:.1f} m"
           f" (slow wind meander, autocorr {r['ac1E']:+.2f}); pendulum band empty.")
-    print("    => long-line pendulum EXCLUDED; short-line invisible but needs a violent 40-55 deg swing.")
+    Tp6, Ax6, th6 = pendulum_disp(3.0, L_ROPE_CONFIRMED)
+    print(f"    => long-line pendulum EXCLUDED; confirmed L={L_ROPE_CONFIRMED:.0f} m swing:"
+          f" T={Tp6:.1f}s (aliased), A_x={Ax6:.1f}m (below noise), angle={th6:.0f}° (plausible)."
+          f"\n    => pendulum hypothesis CANNOT BE EXCLUDED for confirmed rope length.")
 
 
 def fig_h5_pendulum(df, st, out='TTS9_H5_pendulum.png'):
